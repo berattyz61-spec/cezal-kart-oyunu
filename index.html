@@ -8,21 +8,15 @@
     <title>Kaos Kartları - Parti Oyunu</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #0f172a; /* Slate 900 */
-            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-
-        h1 {
-            font-family: 'Bangers', cursive;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px #ec4899, 0 0 20px #ec4899;
+            color: white;
+            overflow: hidden; /* Prevent scrolling on mobile */
+            touch-action: manipulation; /* Prevent double-tap zoom */
         }
 
         /* Card 3D Effect */
@@ -33,6 +27,8 @@
             height: 60vh;
             max-height: 450px;
             margin: 0 auto;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .card {
@@ -41,7 +37,6 @@
             position: relative;
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transform-style: preserve-3d;
-            cursor: pointer;
         }
 
         .card.is-flipped {
@@ -54,46 +49,38 @@
             position: absolute;
             backface-visibility: hidden;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             padding: 2rem;
             text-align: center;
             border: 2px solid rgba(255,255,255,0.1);
         }
 
-        /* Front of the card (The cover) */
+        /* Front of the card (Logo) */
         .card-front {
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-            color: white;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            /* Neon glow effect */
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), inset 0 0 20px rgba(255,255,255,0.2);
         }
 
-        .card-front::before {
-            content: '?';
-            font-size: 8rem;
-            font-family: 'Bangers', cursive;
-            opacity: 0.5;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .card-front .logo-text {
+        .card-front-pattern {
             position: absolute;
-            bottom: 30px;
-            font-family: 'Bangers', cursive;
-            font-size: 2rem;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0 #000;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.2) 2px, transparent 2px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+            border-radius: 20px;
         }
 
-        /* Back of the card (The Dare) */
+        /* Back of the card (Dare) */
         .card-back {
             background: #1e293b;
-            color: white;
             transform: rotateY(180deg);
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.4);
             border-color: #ec4899;
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.4), inset 0 0 20px rgba(236, 72, 153, 0.2);
         }
 
         .dare-category {
@@ -105,6 +92,9 @@
             margin-bottom: 1rem;
             position: absolute;
             top: 30px;
+            width: 100%;
+            text-align: center;
+            left: 0;
         }
 
         .dare-text {
@@ -116,479 +106,344 @@
             max-height: 70%;
             width: 100%;
             padding: 0 10px;
-            /* Scrollbar styling for text */
             scrollbar-width: none; /* Firefox */
         }
+        
         .dare-text::-webkit-scrollbar {
             display: none; /* Chrome, Safari, Edge */
         }
 
-        /* Particle animations */
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(10deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
+        /* Floating background elements */
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+        .bg-blob {
+            animation: pulse-slow 8s infinite ease-in-out;
         }
 
-        .floating {
-            animation: float 4s ease-in-out infinite;
-        }
-
-        /* Button Glow */
-        .btn-glow {
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
-            transition: all 0.3s ease;
-        }
-        .btn-glow:hover {
-            box-shadow: 0 0 25px rgba(139, 92, 246, 0.9);
-            transform: translateY(-2px);
-        }
-        .btn-glow:active {
-            transform: translateY(2px);
-        }
-
-        /* Modal (Geçmiş) Stilleri */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 50;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .modal-content {
-            background: #1e293b;
-            border: 2px solid #ec4899;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 40px rgba(236, 72, 153, 0.2);
-            transform: translateY(20px) scale(0.95);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0) scale(1);
-        }
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-        }
-        .modal-body {
-            padding: 1.5rem;
-            overflow-y: auto;
-            flex-grow: 1;
-            /* Scrollbar styling */
-            scrollbar-width: thin;
-            scrollbar-color: #ec4899 #1e293b;
-        }
-        .modal-body::-webkit-scrollbar {
+        /* Custom Scrollbar for History Modal */
+        #historyList::-webkit-scrollbar {
             width: 6px;
         }
-        .modal-body::-webkit-scrollbar-track {
-            background: #1e293b;
+        #historyList::-webkit-scrollbar-track {
+            background: #0f172a; 
+            border-radius: 10px;
         }
-        .modal-body::-webkit-scrollbar-thumb {
-            background-color: #ec4899;
-            border-radius: 20px;
-        }
-        .history-item {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid #fff;
-            transition: transform 0.2s;
-        }
-        .history-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateX(5px);
-        }
-        
-        .level-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            letter-spacing: 1px;
-            color: #fff;
+        #historyList::-webkit-scrollbar-thumb {
+            background: #ec4899; 
+            border-radius: 10px;
         }
     </style>
 </head>
-<body class="text-white min-h-screen flex flex-col relative w-full h-full">
+<body class="min-h-screen flex flex-col relative antialiased selection:bg-pink-500 selection:text-white">
 
-    <!-- Ambient background decorations -->
-    <div class="absolute top-10 left-10 w-32 h-32 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-    <div class="absolute bottom-10 right-10 w-32 h-32 bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style="animation-delay: 1s;"></div>
+    <!-- Background Effects -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 bg-blob"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-pink-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 bg-blob" style="animation-delay: 4s;"></div>
+    </div>
 
+    <!-- Header -->
     <header class="w-full py-6 flex flex-col items-center justify-center z-10 mt-12 md:mt-4 relative">
         <button id="resetBtn" class="absolute -top-2 md:top-2 left-4 md:left-10 bg-[#1e293b] hover:bg-[#ef4444] text-white py-2 px-4 rounded-full border border-[#ef4444] shadow-[0_0_10px_rgba(239,68,68,0.3)] transition-all text-sm font-semibold flex items-center gap-2 z-20 group">
             <span class="group-hover:-rotate-180 transition-transform duration-500 inline-block">🔄</span> <span class="hidden md:inline">Sıfırla</span>
         </button>
+        
         <button id="historyBtn" class="absolute -top-2 md:top-2 right-4 md:right-10 bg-[#1e293b] hover:bg-[#334155] text-white py-2 px-4 rounded-full border border-[#ec4899] shadow-[0_0_10px_rgba(236,72,153,0.3)] transition-all text-sm font-semibold flex items-center gap-2 z-20">
             <span>📜</span> <span class="hidden md:inline">Geçmiş</span> <span id="historyCount" class="bg-[#ec4899] text-white text-xs px-2 py-0.5 rounded-full ml-1">0</span>
         </button>
-        <h1 class="text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-2 mt-4 md:mt-0 text-center px-2 leading-tight">KAOS KARTLARI</h1>
+
+        <h1 class="text-4xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-2 mt-4 md:mt-0 text-center px-2 font-extrabold tracking-tight">KAOS KARTLARI</h1>
         <p class="text-gray-400 text-sm md:text-base font-semibold tracking-wide">Cesaretin var mı?</p>
     </header>
 
-    <main class="flex-grow flex flex-col items-center justify-center z-10 px-4 w-full max-w-md mx-auto">
+    <!-- Main Game Area -->
+    <main class="flex-grow flex flex-col items-center justify-center z-10 w-full">
         
-        <div class="card-container floating mb-12" id="cardContainer">
-            <div class="card" id="gameCard">
-                <div class="card-face card-front">
-                    <div class="logo-text">KAOS</div>
+        <div class="card-container" id="cardContainer">
+            <div class="card" id="card">
+                <!-- Front Side -->
+                <div class="card-face card-front flex flex-col justify-center items-center">
+                    <div class="card-front-pattern"></div>
+                    <div class="text-6xl mb-4 z-10 animate-bounce">🃏</div>
+                    <h2 class="text-3xl font-bold text-white z-10 uppercase tracking-widest drop-shadow-lg">Dokun</h2>
+                    <p class="text-blue-200 mt-2 z-10 text-sm opacity-80">veya butona bas</p>
                 </div>
+                
+                <!-- Back Side -->
                 <div class="card-face card-back">
-                    <div class="dare-category" id="dareCategory">CEZA</div>
-                    <div class="dare-text" id="dareText">
-                        İlk kartı çekmek için aşağıdaki butona tıkla!
+                    <div class="dare-category" id="dareCategory">KATEGORİ</div>
+                    <div class="dare-text text-white" id="dareText">
+                        Buraya çok çılgın bir görev gelecek. Hazır ol!
+                    </div>
+                    <div class="absolute bottom-6 w-full text-center left-0 text-xs text-gray-500 uppercase tracking-widest">
+                        Kaos Kartları
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="w-full flex justify-center pb-8">
-            <button id="drawBtn" class="btn-glow bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-4 px-10 rounded-full text-xl w-full max-w-[250px] uppercase tracking-wider relative overflow-hidden">
-                <span class="relative z-10">Kart Çek</span>
-            </button>
-        </div>
+        <button id="drawBtn" class="mt-10 md:mt-12 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-4 px-12 rounded-full text-lg shadow-[0_0_20px_rgba(236,72,153,0.5)] transition-all transform hover:scale-105 active:scale-95 uppercase tracking-wider">
+            Kart Çek
+        </button>
+        
+        <p id="cardsLeft" class="mt-4 text-gray-400 text-sm font-medium">Kalan Kart: <span id="cardsLeftCount">0</span></p>
+
     </main>
 
-    <!-- Geçmiş Modalı -->
-    <div id="historyModal" class="modal-overlay">
-        <div class="modal-content relative">
-            <div class="modal-header">
-                <button id="closeModalBtn" class="absolute top-4 right-5 text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
-                <h2 class="text-2xl font-bold text-center text-pink-500" style="font-family: 'Bangers', cursive; letter-spacing: 2px;">CEZA GEÇMİŞİ</h2>
+    <!-- History Modal -->
+    <div id="historyModal" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-[#1e293b] border border-[#ec4899] w-full max-w-md rounded-2xl p-6 shadow-[0_0_40px_rgba(236,72,153,0.2)] flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-700">
+                <h3 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Çekilen Kartlar Geçmişi</h3>
+                <button id="closeHistoryBtn" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
             </div>
-            <div class="modal-body">
-                <div id="historyList" class="flex flex-col">
-                    <div class="text-center text-gray-400 italic py-10">Henüz hiç ceza çekilmedi. Masumiyet devam ediyor...</div>
-                </div>
+            
+            <div id="historyList" class="overflow-y-auto flex-grow flex flex-col gap-3 pr-2">
+                <!-- History items will be injected here -->
+                <p class="text-gray-500 text-center italic mt-4">Henüz hiç kart çekilmedi.</p>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script>
-        // 1: HAFİF, 2: ORTA, 3: AĞIR, 4: KAOS
-        const dares = [
-            // --- SEVİYE 1: HAFİF (30 Adet) ---
-            { level: 1, text: "Gruptaki birinin 1 dakika boyunca en abartılı şekilde taklidini yap." },
-            { level: 1, text: "Telefonunu sağındaki kişiye ver, galerindeki ilk 10 fotoğrafa baksın." },
-            { level: 1, text: "Kendi kendine 2 dakika boyunca Fransızca konuşuyormuş gibi yap (Uydur)." },
-            { level: 1, text: "Telefonunun tarayıcı geçmişindeki son 5 aramayı yüksek sesle oku." },
-            { level: 1, text: "Gruptan birine en tuhaf yeteneğini göster." },
-            { level: 1, text: "Sıra sana tekrar gelene kadar sadece fısıldayarak konuş." },
-            { level: 1, text: "Bir çorabını çıkarıp ellerinden birine eldiven gibi geçir, oyun sonuna kadar çıkarma." },
-            { level: 1, text: "Sıra sana tekrar gelene kadar her cümlenin sonuna 'manyak mısın?' ekle." },
-            { level: 1, text: "Gruptaki herkese sırayla dönüp 'Beni neden sevmiyorsun?' de ve ağlıyormuş gibi yap." },
-            { level: 1, text: "Gömleğini/Tişörtünü ters giy ve oyun bitene kadar böyle kal." },
-            { level: 1, text: "Ellerini kullanmadan bir bardak suyu içmeye çalış." },
-            { level: 1, text: "TikTok'ta veya Instagram Reels'ta ilk karşına çıkan dansı ayağa kalkıp yapmaya çalış." },
-            { level: 1, text: "Sıra sana tekrar gelene kadar robot gibi hareket et ve konuş." },
-            { level: 1, text: "Cüzdanındaki veya banka hesabındaki tam parayı gruba söyle." },
-            { level: 1, text: "Instagram'da en son kime DM attığını ve ne yazdığını göster." },
-            { level: 1, text: "Yere yat ve bir solucan gibi sürünerek odanın diğer ucuna git." },
-            { level: 1, text: "Solundaki kişiye 30 saniye boyunca iltifat yağmuruna tut." },
-            { level: 1, text: "Oyun boyunca kimseyle göz teması kurma, kurarsan ekstra ceza çekersin." },
-            { level: 1, text: "Telefonunun şifresini sağındaki kişiye söyle." },
-            { level: 1, text: "Bir kağıda veya telefona gruptaki herkesin portresini 1 dakika içinde uydurukça çiz." },
-            { level: 1, text: "Sıra sana tekrar gelene kadar aksanlı konuş." },
-            { level: 1, text: "Spotify/Apple Music'te 'En Çok Dinlenenler' listeni gruba göster." },
-            { level: 1, text: "Bir dakika boyunca sadece hayvan sesleri çıkararak derdini anlat." },
-            { level: 1, text: "Kendi tişörtünün içine bir buz küpü at ve eriyene kadar çıkarma (veya soğuk su damlat)." },
-            { level: 1, text: "Sağındaki oyuncuyla kıyafetinin bir parçasını değiştir (şapka, hırka vb.)." },
-            { level: 1, text: "Son WhatsApp mesajlaşmanı sesli bir şekilde gruba oku." },
-            { level: 1, text: "En sevdiğin çizgi film karakterinin taklidini yap." },
-            { level: 1, text: "Oyun boyunca ellerini cebinden çıkarma." },
-            { level: 1, text: "Bir fıkra anlat, eğer kimse gülmezse oyundaki herkese bir içecek/su ısmarla." },
-            { level: 1, text: "Telefonundan son izlediğin YouTube videosunu herkese göster." },
-
-            // --- SEVİYE 2: ORTA (30 Adet) ---
-            { level: 2, text: "Gruptaki herkes sana bir soru sorsun, hepsine dürüstçe cevap ver." },
-            { level: 2, text: "Instagram'da keşfete gir ve karşına çıkan 5. gönderiyi kendi hikayende paylaş." },
-            { level: 2, text: "Gruptaki birini seç ve onun en sinir bozucu huyunu yüzüne söyle." },
-            { level: 2, text: "Rehberindeki 5. kişiyi ara ve sadece derin nefes alıp vererek sessiz kal." },
-            { level: 2, text: "Eski bir çocukluk travmanı veya en utanç verici anını detaylarıyla anlat." },
-            { level: 2, text: "WhatsApp'tan ailene 'Benim size söylemem gereken çok önemli bir şey var...' yaz ve 10 dakika cevap verme." },
-            { level: 2, text: "Son 3 günde çektiğin tüm fotoğrafları gruba hızlıca göster." },
-            { level: 2, text: "Kendi kendine 1 dakika boyunca ayna karşısında kavga et." },
-            { level: 2, text: "Rehberde adı 'S' ile başlayan ilk kişiye 'Seni rüyamda gördüm, hayırdır?' yaz." },
-            { level: 2, text: "Gruptakiler senin hakkında bir dedikodu uydursun ve sen bunu kabul et." },
-            { level: 2, text: "Sağındaki kişinin telefonundan rastgele birine kalp emojisi at." },
-            { level: 2, text: "Ağzına biraz su al ve gruptakiler seni güldürmeye çalışsın. Tükürürsen kaybedersin." },
-            { level: 2, text: "Bir dakika boyunca durmadan ağlama taklidi yap, inandırıcı olmazsa tekrar et." },
-            { level: 2, text: "En sevmediğin yemeği dünyanın en lezzetli şeyiymiş gibi 1 dakika boyunca öv." },
-            { level: 2, text: "Gruba telefon galerindeki 15. fotoğrafı göster (Ne olduğuna bakmadan)." },
-            { level: 2, text: "Instagram'daki son arama geçmişini gruba göster." },
-            { level: 2, text: "Telefonunu sessize alıp en yakın arkadaşına 'Çok acil ara beni, kaza yaptım!' yaz, aradığında açma." },
-            { level: 2, text: "2 dakika boyunca sadece İngilizce (veya uydurma İngilizce) konuş." },
-            { level: 2, text: "Instagram'da en son beğendiğin fotoğrafın sahibine DM'den 'Gizli hayranınım' yaz." },
-            { level: 2, text: "Telefon kamerasını aç, dişinde bir şey var mı diye kontrol ettiğin 10 saniyelik bir video çekip hikayene at." },
-            { level: 2, text: "YouTube arama geçmişindeki en utanç verici şeyi yüksek sesle itiraf et." },
-            { level: 2, text: "Rehberden 7. kişiye sadece 'Özür dilerim, her şeyi öğrendim' yaz." },
-            { level: 2, text: "Hikayende boş bir bardağın fotoğrafını paylaşıp '#lüks #şükür' etiketi koy." },
-            { level: 2, text: "Instagram hikayene sadece bir tavan veya duvar fotoğrafı atıp 'Çok derin...' yaz." },
-            { level: 2, text: "Bir ünlünün en son fotoğrafına 'Beni neden terk ettin?' diye yorum at." },
-            { level: 2, text: "Twitter/X'e 'Sanırım aşık oldum ama kime olduğunu bilmiyorum' yaz." },
-            { level: 2, text: "Son sipariş verdiğin restoranı ara ve 'Yemeğe aşık oldum, aşçınız bekar mı?' diye sor." },
-            { level: 2, text: "Telefonunun kamerasını aç, en garip yüz ifadenle selfie çek ve WhatsApp durumunda paylaş." },
-            { level: 2, text: "Rehberinde 'M' harfiyle başlayan ilk kişiye 'Sırrını biliyorum' yazıp telefonunu sessize al." },
-            { level: 2, text: "Instagram'da seni takip etmeyen eski bir okul/iş arkadaşına DM atıp 'Rüyama girdin, hayırdır?' de." },
-
-            // --- SEVİYE 3: AĞIR (30 Adet) ---
-            { level: 3, text: "Telefonunu sağındaki kişiye ver, istediği bir kişiye mesaj atsın (Geri alana kadar bakmak yasak)." },
-            { level: 3, text: "Eski sevgilinin/flörtünün en son Instagram fotoğrafını beğen ve 1 dakika bekleyip geri çek." },
-            { level: 3, text: "Rastgele bir numarayı ara ve 'Sipariş ettiğim 15 lahmacun nerede kaldı?' diye kız." },
-            { level: 3, text: "Instagram'da takip ettiğin ama pek konuşmadığın birine 'Uzun zamandır senden hoşlanıyorum, buluşalım mı?' yaz." },
-            { level: 3, text: "Solundaki kişinin seçtiği bir kişiye Instagram'dan 'Çok tatlısın, tanışalım mı?' yaz." },
-            { level: 3, text: "Sokak kapısına git, kapıyı aç ve dışarıya doğru 'Ben bir patatesim!' diye bağır." },
-            { level: 3, text: "WhatsApp'ta en son konuştuğun kişiye 'Az önce çok fena rezil oldum, beni buradan kurtar' yaz." },
-            { level: 3, text: "Patronunu/Hocanı ara ve 'Sizi seviyorum' de (Yapamazsan sosyal medyada rezil bir foto paylaş)." },
-            { level: 3, text: "Instagram hikayene sadece bir duvar fotoğrafı atıp 'Hayat bazen çok acımasız...' yaz." },
-            { level: 3, text: "Rehberden rastgele birine 'Bütün sırrını biliyorum, akıllı ol' mesajı at." },
-            { level: 3, text: "Ayağa kalk ve odanın ortasında en ateşli/seksi yürüyüşünü yap." },
-            { level: 3, text: "WhatsApp durumuna 'Galiba aşık oluyorum' yaz ve 1 saat silme." },
-            { level: 3, text: "Rehberinde adı 'A' ile başlayan ilk kişiye 'Seni hiç unutmadım' yaz." },
-            { level: 3, text: "Son konuştuğun kişiye 'Az önce banka soydum, nerede saklanabilirim?' yaz." },
-            { level: 3, text: "Rehberden rastgele birine klavyeye bakmadan gözü kapalı bir mesaj yazıp gönder." },
-            { level: 3, text: "Ailenden birine 'Acil 10.000 TL lazım, telefonu kapatıyorum detay sorma' mesajı at." },
-            { level: 3, text: "Birine boş bir SMS at, 'Ne demek istedin?' diye sorarsa 'Anlayan anladı...' de." },
-            { level: 3, text: "Instagram hikayene 'Sonunda aradığım aşkı buldum' yazıp Google'dan bulduğun rastgele bir mankenin/animenin fotoğrafını at." },
-            { level: 3, text: "Eski sevgiline veya flörtüne 'Geçen gece rüyamdaydın...' yaz." },
-            { level: 3, text: "Kendi numaranı gizle (veya farklı telefondan ara) tanıdığın birine sesini değiştirerek şaka yap." },
-            { level: 3, text: "En sevmediğin akrabana 'Seni çok özledim, bu hafta sonu size geleyim mi?' yaz." },
-            { level: 3, text: "Instagram'da bir butik veya kafeye DM atıp 'Mekanda hayalet var mı, ona göre geleceğim' diye sor." },
-            { level: 3, text: "Eski lise arkadaşına 'O gün okulda olanları kimseye anlatmadın değil mi?' yaz." },
-            { level: 3, text: "Rehberdeki 10. kişiye 'Dün geceyi unutamıyorum, harikaydı' yaz." },
-            { level: 3, text: "Instagram DM'lerinden en eski mesajlaşmanı bulup en son mesajı sesli oku." },
-            { level: 3, text: "Twitter/X veya Instagram'da en cringe bulduğun eski fotoğrafını bulup hikayende paylaş." },
-            { level: 3, text: "Birine ses kaydı at ve sadece 15 saniye boyunca ürpertici bir şekilde gül." },
-            { level: 3, text: "Rehberinden rastgele birine 'Bence artık birbirimizi görmemeliyiz' yaz." },
-            { level: 3, text: "Instagram'dan rastgele bir ünlüye 'Aramızdaki şeyleri neden bitirdin?' diye upuzun sitemli bir mesaj at." },
-            { level: 3, text: "Yakın bir kankana 'Sana çok büyük bir yalan söyledim, yarın yüz yüze konuşalım' yaz ve çevrimdışı ol." },
-
-            // --- SEVİYE 4: KAOS (30 Adet) ---
-            { level: 4, text: "Son aranan 10 kişiden birini ara ve 'Kırbaç mı, kelepçe mi?' diye sor." },
-            { level: 4, text: "WhatsApp'taki son grup sohbetine 'Ben aslında hiçbirinizi sevmiyorum' yazıp hemen çık." },
-            { level: 4, text: "Eski sevgilini ara ve sadece 'Alo' dedikten sonra derin derin nefes alarak 30 saniye sus." },
-            { level: 4, text: "Instagram hikayende ağlıyormuş gibi yapıp 'Bazı şeyler hiç değişmiyor...' yazarak paylaş." },
-            { level: 4, text: "Anneni veya Babanı ara ve çok neşeli/ciddi bir sesle 'Ben gizlice evlendim, eşimle yemeğe geliyoruz' de." },
-            { level: 4, text: "Yakın bir arkadaşına mesaj at: 'Senin hakkında duyduklarım doğru mu? İnanamıyorum...' yaz ve telefonunu kapat." },
-            { level: 4, text: "Instagram'daki en büyük düşmanının/sevmediğin kişinin gönderisine kalp at." },
-            { level: 4, text: "Telefon rehberindeki 1. kişiye 'Aşağıdayım, in.' yaz." },
-            { level: 4, text: "Karşı cinsten kankana (sevgilisi olmayan) 'Uzun zamandır içimde tutuyorum, galiba senden hoşlanıyorum.' yaz." },
-            { level: 4, text: "Patronuna veya hocana gecenin bu saatinde 'Nasılsın canım?' mesajı at." },
-            { level: 4, text: "Eski sevgilinin annesine veya kardeşine DM at: 'Eski günleri özledim, selam söyle.'" },
-            { level: 4, text: "WhatsApp durumuna 'Kabul ediyorum, uzaylılar aramızda ve ben de onlardan biriyim' yaz ve 1 saat silme." },
-            { level: 4, text: "Instagram'da seni takip eden rastgele birine 'Evlen benimle' yaz." },
-            { level: 4, text: "TikTok veya Instagram Reels'a gir, karşına çıkan ilk sese playback yaparak utanç verici bir hikaye çek." },
-            { level: 4, text: "Eski fotoğraflarından en rüküş olanını bulup Instagram hikayene 'Moda ikonu olduğum yıllar' yazarak at." },
-            { level: 4, text: "Telefonun alarmını 1 dakika sonraya kur, çalınca 'Eyvah bomba patlayacak!' diye bağır ve masanın altına saklan." },
-            { level: 4, text: "Instagram'da arama kısmına 'Kedi' veya 'Ördek' yaz, çıkan ilk videoyu hikayende paylaşıp 'İşte benim ruh eşim' yaz." },
-            { level: 4, text: "Rehberden rastgele birine 'Dün gece rüyamda seni gördüm, çok ateşliydi' mesajı at." },
-            { level: 4, text: "WhatsApp aile grubuna 'Ben okulu/işi bırakıp dağ evinde tek başıma yaşamaya karar verdim' yaz." },
-            { level: 4, text: "Instagram hikayene sadece konum olarak 'Terk Edilmiş Akıl Hastanesi' ekle ve siyah ekran paylaş." },
-            { level: 4, text: "'Yanlışlıkla' eski flörtüne 'Dün gece için sağol' yaz." },
-            { level: 4, text: "En son kime mesaj attıysan ona 'Peşimdeler, çabuk adresini ver oraya geliyorum' yaz." },
-            { level: 4, text: "Telefonunu ortaya koy, gruptan biri istediği 3 kişiye senin ağzından ses kaydı atsın." },
-            { level: 4, text: "WhatsApp durumuna 'Şu an ağlıyorum, lütfen kimse yazmasın' yaz." },
-            { level: 4, text: "Rastgele bir numarayı ara ve panik bir sesle 'Ben gelecekten geliyorum, yarın evden çıkma!' de." },
-            { level: 4, text: "Babana 'Kriptoda tüm paramı batırdım, tefecilere borcum var' diye mesaj at." },
-            { level: 4, text: "Liseden/Üniversiteden eski bir hocana Instagram'dan 'Hocam o notu vermeyecektiniz, hala unutmadım' yaz." },
-            { level: 4, text: "Bir arkadaşının sevgilisine 'Dikkatli ol, çok tehlikeli sulardasın' mesajı at." },
-            { level: 4, text: "Bütün sosyal medya hesaplarından profil fotoğrafını silip yerine bir çöp kovası resmi koy (Oyun sonuna kadar)." },
-            { level: 4, text: "Birine 'Sonunda hamleni yaptım, iş tamam. Parayı hazırlayın.' yaz." }
-        ];
-
-        const card = document.getElementById('gameCard');
+        // DOM Elements
+        const card = document.getElementById('card');
+        const cardContainer = document.getElementById('cardContainer');
         const drawBtn = document.getElementById('drawBtn');
-        const dareText = document.getElementById('dareText');
         const dareCategory = document.getElementById('dareCategory');
+        const dareText = document.getElementById('dareText');
         
-        // Geçmiş Modal Elementleri
         const historyBtn = document.getElementById('historyBtn');
         const historyModal = document.getElementById('historyModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
+        const closeHistoryBtn = document.getElementById('closeHistoryBtn');
         const historyList = document.getElementById('historyList');
-        const historyCount = document.getElementById('historyCount');
+        const historyCountDisplay = document.getElementById('historyCount');
         
         const resetBtn = document.getElementById('resetBtn');
-        
+        const cardsLeftCount = document.getElementById('cardsLeftCount');
+
+        // Oyun Verileri - Dengelenmiş ve Komik Cezalar
+        const daresPool = [
+            // 🟩 HAFİF
+            { level: "🟩 HAFİF", text: "Son izlediğin Reels veya TikTok videosunu grup sohbetine gönder ve 'İşte hayatımın özeti' yaz." },
+            { level: "🟩 HAFİF", text: "Telefonunun şarj yüzdesini bağırarak söyle." },
+            { level: "🟩 HAFİF", text: "En son kime ne mesaj attığını sesli bir şekilde oku." },
+            { level: "🟩 HAFİF", text: "Kullanmadığın ve saçma bulduğun 3 uygulamayı hemen şimdi telefonundan sil." },
+            { level: "🟩 HAFİF", text: "En son kimi stalkladığını gruba itiraf et." },
+            { level: "🟩 HAFİF", text: "Spotify/Apple Music'te en son çaldığın şarkıyı açıp 10 saniye boyunca playback yap." },
+            { level: "🟩 HAFİF", text: "Telefonunun duvar kağıdını herkese göster ve nedenini açıkla." },
+            { level: "🟩 HAFİF", text: "Ekrana burnunla dokunarak birine 'Naber' mesajı yazmaya çalış." },
+            { level: "🟩 HAFİF", text: "Arama geçmişindeki son 3 şeyi (çok özel değilse) sesli oku." },
+            { level: "🟩 HAFİF", text: "Gruptan birinin taklidini yap, diğerleri kim olduğunu bulsun." },
+
+            // 🟨 ORTA
+            { level: "🟨 ORTA", text: "Instagram'da takip ettiğin rastgele birine DM at: 'Dün gece rüyamdaydın, çok garipti.'" },
+            { level: "🟨 ORTA", text: "WhatsApp durumuna 'Beklenen an geldi...' yaz ve 15 dakika boyunca silme." },
+            { level: "🟨 ORTA", text: "Bir arkadaşının Instagram'daki en eski fotoğrafını bulup beğen." },
+            { level: "🟨 ORTA", text: "Siri veya Google Asistan'a saçma sapan bir soru sor ve cevabını gruba dinlet." },
+            { level: "🟨 ORTA", text: "Son arananlar listenden 5. kişiyi ara, telefonu açarsa 'Pardon cebimde çalmış' de." },
+            { level: "🟨 ORTA", text: "Birisine 'Senin hakkında bir şey duydum...' yazıp 10 dakika boyunca cevap verme." },
+            { level: "🟨 ORTA", text: "Instagram hikayene tamamen siyah bir ekran atıp sadece '...' yaz." },
+            { level: "🟨 ORTA", text: "Rehberden rastgele birine 'O işi naptın?' yaz." },
+            { level: "🟨 ORTA", text: "Instagram'da anasayfana düşen ilk 3 postu gönderen kişilere bakmadan beğen." },
+            { level: "🟨 ORTA", text: "Telefonunu solundaki kişiye ver, senin ağzından Instagram'dan birine sadece '1' adet emoji atsın." },
+            { level: "🟨 ORTA", text: "Gruptaki en komik bulduğun kişiye 1 dakika boyunca ciddi bir şekilde iltifat et." },
+            { level: "🟨 ORTA", text: "Son konuştuğun WhatsApp grubuna 'Ben galiba aşık oldum' yaz ve telefonu kapat." },
+            { level: "🟨 ORTA", text: "Instagram arama geçmişindeki ilk ismi yüksek sesle söyle." },
+            { level: "🟨 ORTA", text: "WhatsApp'ta en son kime 'hahaha' veya 'random' güldüysen ona 'Aslında hiç komik değildi' yaz." },
+
+            // 🟧 AĞIR
+            { level: "🟧 AĞIR", text: "Instagram ana sayfana düşen ilk gönderiye 'Bu gerçekten gerekli miydi?' yorumunu yap." },
+            { level: "🟧 AĞIR", text: "WhatsApp'ta en son konuştuğun kişiye 'Sana bir sır vermem lazım ama aramızda kalacak' yaz ve 5 dakika bekle." },
+            { level: "🟧 AĞIR", text: "Eski bir sınıf arkadaşına/tanıdığına mesaj at: 'Geçen gün seni gördüm sanki, nasılsın?'" },
+            { level: "🟧 AĞIR", text: "Hikayene sadece bir bardak su fotoğrafı atıp 'Bunu anlayan anladı...' yaz." },
+            { level: "🟧 AĞIR", text: "Rehberinden gözün kapalı birini seç ve ona sadece uzaylı (👽) emojisi gönder." },
+            { level: "🟧 AĞIR", text: "Annene veya babana 'Bugün çok garip bir rüya gördüm, sonra detaylı anlatacağım' yaz." },
+            { level: "🟧 AĞIR", text: "Bir arkadaşına DM'den kendi özçekimini (selfie) at ve 'Sence de bugün çok iyi görünmüyor muyum?' yaz." },
+            { level: "🟧 AĞIR", text: "Instagram'dan rastgele birine 'Tişörtün nerden?' diye DM at (Profilinde tişört olmasa bile)." },
+            { level: "🟧 AĞIR", text: "WhatsApp'ta 3 farklı kişiye aynı anda 'Bana acil 50 TL ateşler misin?' yaz." },
+            { level: "🟧 AĞIR", text: "Rehberindeki 10. kişiye mesaj at: 'Dünkü olay aramızda sır kalacak değil mi?'" },
+            { level: "🟧 AĞIR", text: "Yakın bir arkadaşına mesaj at: 'Seni rüyamda gördüm, bence acil kurşun döktürmen lazım.'" },
+            { level: "🟧 AĞIR", text: "Kendi Instagram fotoğrafına sahte bir hesaptan yazıyormuş gibi 'Çok güzelsin/yakışıklısın' yorumu yap." },
+            { level: "🟧 AĞIR", text: "Son arananlar listendeki 3. kişiye mesaj at: 'Şifreyi buldum, parayı hazırlayın.'" },
+            { level: "🟧 AĞIR", text: "Hikayene bir şarkı sözü paylaş ama bilerek çok arabesk ve damar bir şarkı olsun." },
+
+            // 🟥 KAOS
+            { level: "🟥 KAOS", text: "Son aranan 10 kişiden birine mesaj at: 'Kırbaç mı kelepçe mi tercih edersin?'" },
+            { level: "🟥 KAOS", text: "Kamerayı aç, dişinde bir şey var mı diye incelediğin garip ve sessiz bir videoyu Instagram hikayende paylaş." },
+            { level: "🟥 KAOS", text: "WhatsApp durumuna 'Uzaylılara inanmaya başladım, yakında açıklayacağım' yaz." },
+            { level: "🟥 KAOS", text: "Rehberden 3. kişiye mesaj at: 'Evde misin? Geliyorum.' ve cevap verirse oyalama." },
+            { level: "🟥 KAOS", text: "Instagram'da hikayesine denk geldiğin ilk kişiye (tanısan da tanımasan da) 'Ateş ediyorsun 🔥' yaz." },
+            { level: "🟥 KAOS", text: "En son konuştuğun 3. kişiye sadece 'Miyav' yaz ve hiçbir açıklama yapma." },
+            { level: "🟥 KAOS", text: "Uzaktan bir akrabana durduk yere mesaj at: 'Nasılsınız, sizi çok özledim.'" },
+            { level: "🟥 KAOS", text: "Birine ses kaydı at ve sadece 10 saniye boyunca derin derin nefes alıp ver." },
+            { level: "🟥 KAOS", text: "Gruptaki birinin telefonundan kendi telefonuna 'Senin kadar mükemmel birini tanımadım' mesajı at." },
+            { level: "🟥 KAOS", text: "Instagram'da arama kısmına 'a' yaz, çıkan ilk kişiye 'Seni bulmam uzun sürdü' diye DM at." },
+            { level: "🟥 KAOS", text: "Rehberinden rastgele birini ara, açarsa 'Siparişiniz yola çıktı, 10 dakikaya kapıdayız' de ve kapat." },
+            { level: "🟥 KAOS", text: "Instagram'da bir arkadaşının annesini/babasını bul (veya abisini) ve son fotoğrafını beğen." },
+            { level: "🟥 KAOS", text: "TikTok veya Reels aç, karşına çıkan ilk dans videosunu taklit edip gruba videosunu at." },
+            { level: "🟥 KAOS", text: "WhatsApp durumuna sadece kendi IBAN'ını kopyalayıp yapıştır, hiçbir açıklama yazma." }
+        ];
+
+        let availableDares = [];
+        let history = [];
         let isFlipping = false;
-        let drawnHistory = []; // Çekilen kartların geçmişini tutar
-        let availableDares = []; // Çekilmeyen kartları (desteyi) tutar
 
-        // Seviyelere göre renk ve isim ayarları
-        const levelConfig = {
-            1: { name: 'SEVİYE: HAFİF', color: '#10b981', glow: '#10b981' }, // Yeşil
-            2: { name: 'SEVİYE: ORTA', color: '#eab308', glow: '#eab308' },  // Sarı
-            3: { name: 'SEVİYE: AĞIR', color: '#f97316', glow: '#f97316' },  // Turuncu
-            4: { name: 'SEVİYE: KAOS', color: '#ef4444', glow: '#ef4444' }   // Kırmızı
-        };
-
-        function drawCard() {
-            if (isFlipping) return;
-            isFlipping = true;
-
-            if (card.classList.contains('is-flipped')) {
-                card.classList.remove('is-flipped');
-                setTimeout(() => {
-                    revealNewDare();
-                }, 800);
-            } else {
-                revealNewDare();
-            }
-        }
-
-        // Diziyi rastgele karıştırmak için Fisher-Yates algoritması
+        // Kartları Karıştırma Fonksiyonu (Fisher-Yates)
         function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
             }
+            return array;
         }
 
-        // Oyunu ilk haline veya sıfırlanmış haline döndüren fonksiyon
+        // Oyunu Başlat / Sıfırla
         function initGame() {
-            // Tüm cezaları kopyala ve desteyi karıştır
-            availableDares = [...dares];
+            availableDares = [...daresPool];
             shuffleArray(availableDares);
+            history = [];
+            updateHistoryUI();
+            updateCardsLeft();
             
-            // Geçmişi sıfırla
-            drawnHistory = [];
-            historyCount.textContent = '0';
-            historyList.innerHTML = '<div class="text-center text-gray-400 italic py-10">Henüz hiç ceza çekilmedi. Masumiyet devam ediyor...</div>';
-            
-            // Kart arayüzünü başlangıç haline getir
-            dareCategory.textContent = "CEZA";
-            dareCategory.style.color = "#ec4899";
-            dareText.textContent = "İlk kartı çekmek için aşağıdaki butona tıkla!";
-            
-            const cardBack = document.querySelector('.card-back');
-            cardBack.style.borderColor = "#ec4899";
-            cardBack.style.boxShadow = "0 0 20px rgba(236, 72, 153, 0.4), inset 0 0 20px rgba(236, 72, 153, 0.2)";
-            
+            // Eğer kart açıksa kapat
             if (card.classList.contains('is-flipped')) {
                 card.classList.remove('is-flipped');
             }
         }
 
-        function revealNewDare() {
-            // Destede kart kalmadıysa uyar
-            if (availableDares.length === 0) {
-                dareText.textContent = "Tüm kartlar bitti! Yeniden başlamak için Sıfırla butonuna tıkla.";
-                dareCategory.textContent = "OYUN BİTTİ";
-                dareCategory.style.color = "#ffffff";
-                
-                const cardBack = document.querySelector('.card-back');
-                cardBack.style.borderColor = "#ffffff";
-                cardBack.style.boxShadow = "0 0 20px rgba(255, 255, 255, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.2)";
-                
-                card.classList.add('is-flipped');
-                setTimeout(() => {
-                    isFlipping = false;
-                }, 800);
+        function updateCardsLeft() {
+            cardsLeftCount.innerText = availableDares.length;
+        }
+
+        function updateHistoryUI() {
+            historyCountDisplay.innerText = history.length;
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p class="text-gray-500 text-center italic mt-4">Henüz hiç kart çekilmedi.</p>';
                 return;
             }
 
-            // Karıştırılmış desteden son kartı çek (Böylece asla tekrar etmez)
-            const selectedDare = availableDares.pop();
-            const config = levelConfig[selectedDare.level];
-
-            // Arayüzü güncelle
-            dareText.textContent = selectedDare.text;
-            dareCategory.textContent = config.name;
-            dareCategory.style.color = config.color;
-            
-            const cardBack = document.querySelector('.card-back');
-            cardBack.style.borderColor = config.color;
-            cardBack.style.boxShadow = `0 0 20px ${config.glow}66, inset 0 0 20px ${config.glow}33`; 
-
-            // Geçmişe ekle
-            addToHistory(selectedDare, config);
-
-            // Kartı çevir
-            card.classList.add('is-flipped');
-            setTimeout(() => {
-                isFlipping = false;
-            }, 800);
-        }
-
-        function addToHistory(dare, config) {
-            drawnHistory.unshift({ text: dare.text, config: config }); // Başa ekle
-            historyCount.textContent = drawnHistory.length;
-            renderHistory();
-        }
-
-        function renderHistory() {
-            if(drawnHistory.length === 0) return;
-            
-            historyList.innerHTML = ''; // Listeyi temizle
-            
-            drawnHistory.forEach((item, index) => {
-                const historyDiv = document.createElement('div');
-                historyDiv.className = 'history-item';
-                historyDiv.style.borderLeftColor = item.config.color;
+            historyList.innerHTML = '';
+            // En son çekilen en üstte görünsün diye ters çeviriyoruz
+            [...history].reverse().forEach((item, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'bg-[#0f172a] p-3 rounded-xl border border-gray-700 flex flex-col gap-1';
                 
-                historyDiv.innerHTML = `
-                    <div class="level-badge" style="background-color: ${item.config.color}33; color: ${item.config.color};">
-                        ${item.config.name}
-                    </div>
-                    <div class="text-sm font-medium text-gray-200 mt-1">${item.text}</div>
+                let textColor = 'text-green-400';
+                if(item.level.includes("ORTA")) textColor = 'text-yellow-400';
+                if(item.level.includes("AĞIR")) textColor = 'text-orange-400';
+                if(item.level.includes("KAOS")) textColor = 'text-red-500';
+
+                historyItem.innerHTML = `
+                    <span class="text-xs font-bold ${textColor}">${item.level}</span>
+                    <p class="text-sm text-gray-200">${item.text}</p>
                 `;
-                historyList.appendChild(historyDiv);
+                historyList.appendChild(historyItem);
             });
         }
 
-        // Modal Olay Dinleyicileri
-        historyBtn.addEventListener('click', () => {
-            historyModal.classList.add('active');
-        });
+        function drawRandomDare() {
+            if (isFlipping) return;
 
-        closeModalBtn.addEventListener('click', () => {
-            historyModal.classList.remove('active');
-        });
+            if (availableDares.length === 0) {
+                alert("Oyun Bitti! Tüm kartlar çekildi. Yeniden başlamak için Sıfırla butonuna basın.");
+                return;
+            }
 
-        // Modalin dışına tıklayınca kapatma
-        historyModal.addEventListener('click', (e) => {
-            if(e.target === historyModal) {
-                historyModal.classList.remove('active');
+            isFlipping = true;
+            drawBtn.disabled = true;
+            drawBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // Eğer kart zaten açıksa, önce kapat, bekle, sonra yenisini aç
+            if (card.classList.contains('is-flipped')) {
+                card.classList.remove('is-flipped');
+                setTimeout(() => {
+                    setNewCardAndFlip();
+                }, 800); // Kapanma animasyonu süresi
+            } else {
+                setNewCardAndFlip();
+            }
+        }
+
+        function setNewCardAndFlip() {
+            // Desteden kart al
+            const currentDare = availableDares.pop();
+            
+            // Tarihçeye ekle
+            history.push(currentDare);
+            updateHistoryUI();
+            updateCardsLeft();
+
+            // Rengi seviyeye göre ayarla
+            if(currentDare.level.includes("HAFİF")) {
+                dareCategory.style.color = "#4ade80"; // green
+                card.querySelector('.card-back').style.boxShadow = "0 0 30px rgba(74, 222, 128, 0.4)";
+                card.querySelector('.card-back').style.borderColor = "#4ade80";
+            } else if (currentDare.level.includes("ORTA")) {
+                dareCategory.style.color = "#facc15"; // yellow
+                card.querySelector('.card-back').style.boxShadow = "0 0 30px rgba(250, 204, 21, 0.4)";
+                card.querySelector('.card-back').style.borderColor = "#facc15";
+            } else if (currentDare.level.includes("AĞIR")) {
+                dareCategory.style.color = "#fb923c"; // orange
+                card.querySelector('.card-back').style.boxShadow = "0 0 30px rgba(251, 146, 60, 0.4)";
+                card.querySelector('.card-back').style.borderColor = "#fb923c";
+            } else {
+                dareCategory.style.color = "#ef4444"; // red
+                card.querySelector('.card-back').style.boxShadow = "0 0 40px rgba(239, 68, 68, 0.6)";
+                card.querySelector('.card-back').style.borderColor = "#ef4444";
+            }
+
+            // Metinleri güncelle
+            dareCategory.innerText = currentDare.level;
+            dareText.innerText = currentDare.text;
+
+            // Kartı çevir
+            card.classList.add('is-flipped');
+
+            // Animasyon bittikten sonra kilitleri aç
+            setTimeout(() => {
+                isFlipping = false;
+                drawBtn.disabled = false;
+                drawBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }, 800);
+        }
+
+        // Event Listeners
+        drawBtn.addEventListener('click', drawRandomDare);
+        cardContainer.addEventListener('click', drawRandomDare);
+        
+        resetBtn.addEventListener('click', () => {
+            if(confirm("Tüm kartları karıştırıp oyunu sıfırlamak istediğine emin misin?")) {
+                initGame();
             }
         });
 
-        // Oyunu Sıfırlama Butonu İşlevi
-        resetBtn.addEventListener('click', () => {
-            resetBtn.classList.add('scale-95');
-            setTimeout(() => resetBtn.classList.remove('scale-95'), 150);
-            initGame();
+        // Modal Controls
+        historyBtn.addEventListener('click', () => {
+            historyModal.classList.remove('hidden');
+            historyModal.classList.add('flex');
         });
 
-        // Butona ve karta tıklama olayları
-        drawBtn.addEventListener('click', drawCard);
-        card.addEventListener('click', drawCard);
-        
-        drawBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); 
-            drawCard();
+        closeHistoryBtn.addEventListener('click', () => {
+            historyModal.classList.add('hidden');
+            historyModal.classList.remove('flex');
         });
 
-        // Sayfa yüklendiğinde desteyi hazırla
+        // Close modal when clicking outside
+        historyModal.addEventListener('click', (e) => {
+            if (e.target === historyModal) {
+                historyModal.classList.add('hidden');
+                historyModal.classList.remove('flex');
+            }
+        });
+
+        // Oyunu ilk kez başlat
         initGame();
     </script>
 </body>
